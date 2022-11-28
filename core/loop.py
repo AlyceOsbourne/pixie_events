@@ -1,22 +1,28 @@
 import sys
 import inspect
+from functools import cache
 
 
 class QuitException(Exception):
     pass
 
 
+@cache
+def _predicate(module):
+    return not any((
+        module is None,
+        not inspect.ismodule(module),
+        module is sys.modules[__name__],
+        not hasattr(module, '__file__'),
+        not getattr(module, '__file__', '').startswith(sys.path[0]))
+    )
+
+
 def _get():
     yield from (
-        module for name, module
-        in list(sys.modules.items()) if
-        not any((
-            module is None,
-            not inspect.ismodule(module),
-            module is sys.modules[__name__],
-            not hasattr(module, '__file__'),
-            not getattr(module, '__file__', '').startswith(sys.path[0]))
-        )
+        module for module
+        in list(sys.modules.values()) if
+        _predicate(module)
     )
 
 

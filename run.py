@@ -3,7 +3,7 @@ from core import *
 if __name__ == "__main__":
 
     i = 0
-    lim = 100
+    lim = 3
 
 
     class Events(Event):

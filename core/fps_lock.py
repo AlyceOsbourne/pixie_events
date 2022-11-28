@@ -10,15 +10,12 @@ lock = True
 
 def update():
     global last_time, delta_time
-    print('updating fps')
     if lock:
-        print('locking')
         sleep_time = 1 / fps - (time.time() - last_time)
         if sleep_time > 0:
             time.sleep(sleep_time)
     delta_time = time.time() - last_time
     last_time = time.time()
-    print(f"deltatime: {delta_time}")
 
 
 def set_fps(new_fps):
