@@ -29,25 +29,22 @@ def _get():
 def _setup(module):
     if hasattr(module, 'setup'):
         if inspect.isfunction(module.setup):
-            module.setup()
-        else:
-            print(f'WARNING: {module.__name__}.setup is not a function')
+            return module.setup()
+        print(f'WARNING: {module.__name__}.setup is not a function')
 
 
 def _teardown(module):
     if hasattr(module, 'teardown'):
         if inspect.isfunction(module.teardown):
-            module.teardown()
-        else:
-            print(f'WARNING: {module.__name__}.teardown is not a function')
+            return module.teardown()
+        print(f'WARNING: {module.__name__}.teardown is not a function')
 
 
 def _update(module):
     if hasattr(module, 'update'):
         if inspect.isfunction(module.update):
-            module.update()
-        else:
-            print(f'WARNING: {module.__name__}.update is not a function')
+            return module.update()
+        print(f'WARNING: {module.__name__}.update is not a function')
 
 
 def before(*before_func):
@@ -56,9 +53,7 @@ def before(*before_func):
             for _func in before_func:
                 _func()
             return func(*args, **kwargs)
-
         return wrapper
-
     return dec
 
 
@@ -69,9 +64,7 @@ def after(*after_func):
             for _func in after_func:
                 _func()
             return result
-
         return wrapper
-
     return dec
 
 
@@ -85,3 +78,4 @@ def run():
     except QuitException:
         for module in _get():
             _teardown(module)
+        exit()
