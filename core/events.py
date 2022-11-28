@@ -1,19 +1,21 @@
+from _weakrefset import WeakSet
 from collections import deque
 from enum import Flag
-from concurrent.futures import ThreadPoolExecutor
+
 events = {}
 event_queue = deque()
 
+
 def subscribe(event):
     def decorator(func):
-        events.setdefault(event, []).append(func)
+        events.setdefault(event, WeakSet()).add(func)
         return func
 
     return decorator
 
 
 def publish(event, *args, **kwargs):
-    for func in events.get(event, []):
+    for func in events.get(event, set()):
         event_queue.append((func, args, kwargs))
 
 
