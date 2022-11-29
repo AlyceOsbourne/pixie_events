@@ -18,7 +18,7 @@ def publish(event, *args, **kwargs):
         event_queue.append((func, args, kwargs))
 
 
-def update():
+def update(priority = float('inf')):
     curr = event_queue.copy()
     event_queue.clear()
     while curr:

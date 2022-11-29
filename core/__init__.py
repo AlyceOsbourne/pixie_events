@@ -1,11 +1,10 @@
-from . import loop, diet_async_io
+from . import loop
 from .events import publish, subscribe, Event
 
 before = loop.before
 after = loop.after
 run = loop.run
-add_coroutine = diet_async_io.add
-
+priority = loop.priority
 
 def finish():
     raise loop.QuitException
@@ -19,4 +18,14 @@ def teardown():
     events.teardown()
 
 
-__all__ = ['loop', 'run', 'Event', 'subscribe', 'publish', 'finish', 'before', 'after', 'add_coroutine']
+__all__ = [
+    'loop',
+    'run',
+    'Event',
+    'subscribe',
+    'publish',
+    'finish',
+    'before',
+    'after',
+    'priority'
+]

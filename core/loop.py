@@ -1,5 +1,5 @@
-import sys
 import inspect
+import sys
 import time
 from functools import cache, wraps
 
@@ -22,26 +22,27 @@ def _predicate(module):
 
 
 @cache
-def _sort_key(module):
-    if hasattr(module, 'update'):
-        if inspect.isfunction(module.update):
-            sig = inspect.signature(module.update)
-            if 'priority' in sig.parameters:
-                return sig.parameters['priority'].default
-    return 0
+def _sort_key(module, f_name):
+    if not all((
+            hasattr(module, f_name),
+            inspect.isfunction(getattr(module, f_name)),
+            hasattr(getattr(module, f_name), 'priority')
+    )):
+        return 0
+    return getattr(getattr(module, f_name), 'priority')
 
 
 @cache
-def _sort(modules):
-    return sorted(modules, key=_sort_key, reverse=True)
+def _sort(modules, f_name):
+    return sorted(modules, key=lambda m: _sort_key(m, f_name), reverse=True)
 
 
-def _get():
+def _get(f_name):
     yield from _sort((
         module for module
-        in list(sys.modules.values()) if
+        in set(sys.modules.values()) if
         _predicate(module)
-    ))
+    ), f_name)
 
 
 def _setup(module):
@@ -107,16 +108,26 @@ def get_update_rate():
     return UPS
 
 
+def priority(_priority):
+    def dec(func):
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        wrapper.priority = _priority
+        return wraps(func)(wrapper)
+    return dec
+
+
 def run():
     last_time = time.time()
-    for module in _get():
+    for module in _get('setup'):
         _setup(module)
     try:
         while True:
-            for module in _get():
+            for module in _get('update'):
                 _update(module)
             last_time = _lim(last_time)
     except QuitException:
-        for module in _get():
+        for module in _get('teardown'):
             _teardown(module)
         exit()
