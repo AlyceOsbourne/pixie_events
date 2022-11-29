@@ -10,7 +10,6 @@ def subscribe(event):
     def decorator(func):
         events.setdefault(event, WeakSet()).add(func)
         return func
-
     return decorator
 
 

@@ -1,4 +1,5 @@
 from core import *
+import test_update
 
 if __name__ == "__main__":
 
@@ -8,7 +9,6 @@ if __name__ == "__main__":
 
     class Events(Event):
         ping = 1
-
 
     @Events.ping.subscribe
     def pong():
@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     @before(lambda: print('Before'))
     @after(lambda: print('After'))
-    def update():
+    def update(priority = 1): # control the order of the update functions by adding the priority keyword argument
         global i
         print('Ping')
         Events.ping.publish()

@@ -1,6 +1,9 @@
 import sys
 import inspect
-from functools import cache
+import time
+from functools import cache, wraps
+
+UPS = 60
 
 
 class QuitException(Exception):
@@ -18,12 +21,27 @@ def _predicate(module):
     )
 
 
+@cache
+def _sort_key(module):
+    if hasattr(module, 'update'):
+        if inspect.isfunction(module.update):
+            sig = inspect.signature(module.update)
+            if 'priority' in sig.parameters:
+                return sig.parameters['priority'].default
+    return 0
+
+
+@cache
+def _sort(modules):
+    return sorted(modules, key=_sort_key, reverse=True)
+
+
 def _get():
-    yield from (
+    yield from _sort((
         module for module
         in list(sys.modules.values()) if
         _predicate(module)
-    )
+    ))
 
 
 def _setup(module):
@@ -40,6 +58,14 @@ def _teardown(module):
         print(f'WARNING: {module.__name__}.teardown is not a function')
 
 
+def _lim(last_time):
+    sleep_time = 1 / UPS - (time.time() - last_time)
+    if sleep_time > 0:
+        time.sleep(sleep_time)
+    last_time = time.time()
+    return last_time
+
+
 def _update(module):
     if hasattr(module, 'update'):
         if inspect.isfunction(module.update):
@@ -53,7 +79,9 @@ def before(*before_func):
             for _func in before_func:
                 _func()
             return func(*args, **kwargs)
-        return wrapper
+
+        return wraps(func)(wrapper)
+
     return dec
 
 
@@ -64,17 +92,30 @@ def after(*after_func):
             for _func in after_func:
                 _func()
             return result
-        return wrapper
+
+        return wraps(func)(wrapper)
+
     return dec
 
 
+def update_rate(new_fps):
+    global UPS
+    UPS = new_fps
+
+
+def get_update_rate():
+    return UPS
+
+
 def run():
+    last_time = time.time()
     for module in _get():
         _setup(module)
     try:
         while True:
             for module in _get():
                 _update(module)
+            last_time = _lim(last_time)
     except QuitException:
         for module in _get():
             _teardown(module)
