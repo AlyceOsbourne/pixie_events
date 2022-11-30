@@ -2,6 +2,12 @@ from .loop import *
 from .events import *
 
 
+class SystemEvents(Event):
+    Quit = """These values don't actually matter, you are just declaring a constant for events, the value you input 
+    here are completely disregarded, I will come up with a more elegant way to do this, I may make a register events
+    method that is called, that dynamically creates this little event system with the easy decos"""
+
+
 def finish():
     # quit the program
     raise loop.QuitException
@@ -13,7 +19,7 @@ def finish():
 @priority(float('inf'))
 def setup():
     """For now, we have no setup required at this level, but keeping it here to show implementation details"""
-    # this is where I may wish to set up system event handlers etc
+    SystemEvents.Quit.subscribe(finish)
 
 
 @priority(float('inf'))

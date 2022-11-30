@@ -16,38 +16,45 @@ is called on program close, can be used to save data
 ### Example:
 
 ```python
-    from pixie_events import *    # Import the module, utilizes __all__ so is * import safe.
+    from pixie_events import *
 
-    i = 0   # these are just here to limit how many times this will loop if you run the example
-    lim = 3
+    i = 0
+    lim = 0
 
+    # everything here is run dynamically, just run the core and it will find and run these functions
+    # across all modules (provided they are imported, I recommend a run module for this)
 
-    class Events(Event):  # Event is a magic Flag enum that allows you to register eny number of Constant events, and subscribe to/emit them
+    class Events(Event):  # create events easily
         ping = 1
+        quit = 2
 
 
-    @Events.ping.subscribe  # Example of subscribing to events
+    @Events.ping.subscribe  # subscribe to events
     def pong():
         print('Pong')
 
 
-    def setup():  # called when run is first called accross all module that import pixie events and has this function
+    def setup():  # set up function, called on run
         print('Setting up...')
+        Events.quit.subscribe(finish)
 
 
-    @before(lambda: print('Before'))  # can be used to run a function before the update loop (or technically any other function)
-    @after(lambda: print('After'))  # ditto, but after the function
-    def update():
+    @before(lambda: print('Before'))  # decorator to add functions to be ran before the update function
+    @after(lambda: print('After'))  # decorator to add functions to be ran after the update function
+    @priority(1)  # control flow using priority
+    def update(
+    ):
         global i
         print('Ping')
-        Events.ping.publish()  # publish events like this, you can pass args and kwargs to this and it will call all callbacks with those args
+        Events.ping.publish()  # publish events
         if i == lim:
-            finish()  # call finish to end the program
+            Events.quit.publish()
         i += 1
 
 
-    def teardown():  # is called when finish has been called (raises an exit exception behind the scenes)
-        print('Tearing Down...')
+    def teardown():  # tear down function, called on finish
+        print('Tearing Down...\a\b')
 
-    run()  # this runs the program loop
+
+    run()  # run the core
 ```
