@@ -32,7 +32,7 @@ def _predicate(module):
         module is sys.modules[__name__],
         not hasattr(module, '__file__'),
         not getattr(module, '__file__', '').startswith(sys.path[0]),
-        not any([getattr(module, attr, None) for attr in ('setup', 'update', 'teardown')]),
+        not any([inspect.isfunction(getattr(module, attr, None)) for attr in ('setup', 'update', 'teardown')]),
     ))
 
 
