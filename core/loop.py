@@ -108,8 +108,6 @@ def before(*before_func):
             raise TypeError('update must be a function')
         if not all([inspect.isfunction(f) for f in before_func]):
             raise TypeError('before_func must be a function')
-        if func.__name__ != 'update':
-            raise TypeError('before can only be used on update functions')
 
         def wrapper(*args, **kwargs):
             for _func in before_func:
@@ -129,8 +127,6 @@ def after(*after_func):
             raise TypeError('update must be a function')
         if not all([inspect.isfunction(f) for f in after_func]):
             raise TypeError('after_func must be a function')
-        if func.__name__ != 'update':
-            raise TypeError('after can only be used on update functions')
 
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
@@ -150,8 +146,7 @@ def priority(_priority):
     def dec(func):
         if not inspect.isfunction(func):
             raise TypeError('update must be a function')
-        if func.__name__ != 'update':
-            raise TypeError('priority can only be used on update functions')
+
         func.priority = _priority
         return func
 
