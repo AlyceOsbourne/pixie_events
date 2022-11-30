@@ -1,26 +1,31 @@
 from _weakrefset import WeakSet
 from collections import deque
 from enum import Flag
-from itertools import count
+
 
 _events = {}  # holds event key and callbacks
 _event_queue = deque()  # event queue
-_event_id = count()
+
+
+def register(name):
+    """Registers an event with the given name"""
+    return _events.setdefault(name, WeakSet())
 
 
 def subscribe(event):
     """Callback decorator for subscribing to events"""
 
     def decorator(func):
-        _events.setdefault(event, WeakSet()).add(func)
+        register(event).add(func)
         return func
-
     return decorator
 
 
 def publish(event, *args, **kwargs):
     # publish event to all subscribers
-    for func in _events.get(event, set()):
+    if event not in _events:
+        raise ValueError(f'Event {event} has no subscribers')
+    for func in _events.get(event):
         _event_queue.append((func, args, kwargs))
 
 
@@ -39,28 +44,30 @@ def teardown():
     _event_queue.clear()
 
 
+# descriptor that makes an attr publish events when they change
+class EventAttr:
+    def __init__(self, event_name):
+        self.event_name = event_name
+        register(event_name)
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, instance, owner):
+        return instance.__dict__.get(self.name, None)
+
+    def __set__(self, instance, value):
+        instance.__dict__[self.name] = value
+        publish(self.event_name, value)
+
+
 class Event(Flag):
     # magical Flag enum that allows for easy creation, subscription and publishing of events
     def subscribe(self, func):
-        return subscribe(self)(func)
+        return subscribe(self.name)(func)
 
     def publish(self, *args, **kwargs):
-        publish(self, *args, **kwargs)
-
-    def __new__(cls, *args, **kwargs):
-        cls._value_ = next(_event_id)
-        return cls
-
-    @staticmethod
-    def event(name):
-        # searches all subclass members for an event with the same name,
-        # this allows you to register events anywhere, and access them though the class
-        # this should be done in the setup function of the module
-        for sub_cls in Event.__class__.__subclasses__():
-            for member in sub_cls.__members__.values():
-                if member.name == name:
-                    return member
-        raise AttributeError(f'Event {name} not found')
+        publish(self.name, *args, **kwargs)
 
 
-__all__ = ['Event', 'subscribe', 'publish']
+__all__ = ['Event', 'subscribe', 'publish', 'register', 'EventAttr']
