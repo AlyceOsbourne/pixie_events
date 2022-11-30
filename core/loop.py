@@ -2,7 +2,6 @@ import inspect
 import sys
 import time
 from functools import cache, wraps
-
 UPS = 60
 
 
@@ -23,11 +22,11 @@ def _predicate(module):
 
 @cache
 def _sort_key(module, f_name):
-    if not all((
-            hasattr(module, f_name),
-            inspect.isfunction(getattr(module, f_name)),
-            hasattr(getattr(module, f_name), 'priority')
-    )):
+    if (
+            not hasattr(module, f_name)
+            or not inspect.isfunction(getattr(module, f_name))
+            or not hasattr(getattr(module, f_name), 'priority')
+    ):
         return 0
     return getattr(getattr(module, f_name), 'priority')
 
@@ -99,7 +98,7 @@ def after(*after_func):
     return dec
 
 
-def update_rate(new_fps):
+def set_update_rate(new_fps):
     global UPS
     UPS = new_fps
 
@@ -115,6 +114,7 @@ def priority(_priority):
 
         wrapper.priority = _priority
         return wraps(func)(wrapper)
+
     return dec
 
 
@@ -131,3 +131,14 @@ def run():
         for module in _get('teardown'):
             _teardown(module)
         exit()
+
+
+__all__ = (
+    'QuitException',
+    'before',
+    'after',
+    'priority',
+    'set_update_rate',
+    'get_update_rate',
+    'run'
+)

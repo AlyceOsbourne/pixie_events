@@ -1,15 +1,12 @@
-from . import loop
-from .events import publish, subscribe, Event
+from .loop import *
+from .events import *
 
-before = loop.before
-after = loop.after
-run = loop.run
-priority = loop.priority
 
 def finish():
     raise loop.QuitException
 
 
+@priority(float('-inf'))
 def update():
     events.update()
 
@@ -27,5 +24,5 @@ __all__ = [
     'finish',
     'before',
     'after',
-    'priority'
+    'priority',
 ]
