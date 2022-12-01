@@ -1,5 +1,5 @@
 ## Pixie Events
-(This is a work in progress)
+(This is a work in progress, and currently very much a proof of concept)
 ___
  A global event system emulating pythons dunder style magic
 ___

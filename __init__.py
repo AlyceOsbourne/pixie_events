@@ -1,19 +1,18 @@
-import src
-from src import subscribe, publish, finish, run, register, before, after, priority
+from src import subscribe, publish, finish, run, register, before, after, priority, EventAttr
 
 if __name__ == "__main__":
     import time
 
     class ItsMagic:
-        observed_attr = src.EventAttr('observed_attr')
+        observed_attr = EventAttr('on_attr_change')
 
         def __init__(self):
             self.observed_attr = 0
 
     magic = ItsMagic()
 
-    @subscribe('observed_attr')
-    def on_attr_change(instance, value):
+    @subscribe('on_attr_change')
+    def on_attr_changed(instance, value):
         print('observed_attr changed to ', value, ' on ', instance)
 
     @subscribe('message')

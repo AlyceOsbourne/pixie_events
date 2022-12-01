@@ -32,6 +32,8 @@ def setup():
     keyboard_listener.start()
     mouse_listener.daemon = True
     mouse_listener.start()
+    keyboard_listener.wait()
+    mouse_listener.wait()
 
 
 def teardown():
