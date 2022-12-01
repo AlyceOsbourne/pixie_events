@@ -21,9 +21,9 @@ def __setup__():
 @priority(float('inf'))
 def __update__():
     """this is triggered with the highest priority, this will be the main control loop for any subsystems I implement"""
-    for key, value in raw_input.get_input().items():
-        events.publish(key, value)
-    raw_input.clear_input()
+    input = raw_input.get_input()
+    events.publish('mouse', **input['mouse'])
+    events.publish('keyboard', input['keyboard'])
     events.update()
 
 

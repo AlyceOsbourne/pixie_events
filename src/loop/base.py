@@ -29,19 +29,19 @@ def _predicate(module):
         module is sys.modules[__name__],
         not hasattr(module, '__file__'),
         not getattr(module, '__file__', '').startswith(sys.path[0]),
-        not any([inspect.isfunction(getattr(module, attr, None)) for attr in ('setup', 'update', 'teardown')]),
+        not any([inspect.isfunction(getattr(module, attr, None)) for attr in ('__setup__', '__update__', '__teardown__')]),
     ))
 
 
 @cache
 def _sort_key(module, f_name):
     """Checks the module for the function name and returns the priority if it exists on the function object,
-    otherwise returns 0 """
+    otherwise returns almost minus infinity, this is so you can have a range of values, and make it so that any defined priority takes precedence"""
     if (
             not hasattr(module, f_name)
             or not hasattr(getattr(module, f_name), 'priority')
     ):
-        return 0
+        return float('-inf') + 10
     return getattr(getattr(module, f_name), 'priority')
 
 
@@ -70,7 +70,7 @@ def setup(module):
         print(f'WARNING: {module.__name__}.setup is not a function')
 
 
-def _update(module):
+def update(module):
     """calls the update function of the module if it exists"""
     if hasattr(module, '__update__'):
         if inspect.isfunction(module.__update__):
@@ -86,8 +86,8 @@ def teardown(module):
         print(f'WARNING: {module.__name__}.teardown is not a function')
 
 
-def _ick(last_tick):
+def tick(last_tick):
     """update tick, updates all the update function and then returns limits the update rate"""
-    for module in get('update'):
-        _update(module)
+    for module in get('__update__'):
+        update(module)
     return _lim(last_tick)

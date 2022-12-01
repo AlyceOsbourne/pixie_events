@@ -86,7 +86,7 @@ def run():
     try:
         last_tick = time.time()
         while True:
-            last_tick = base._ick(last_tick)
+            last_tick = base.tick(last_tick)
     except KeyboardInterrupt:
         _exit()
     except Exception as e:

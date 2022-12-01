@@ -17,7 +17,7 @@ class EventAttr:
 
     def __set__(self, instance, value):
         instance.__dict__[self.name] = value
-        publish(self.event_name, value)
+        publish(self.event_name, instance, value)
 
 
 class Event(Flag):
