@@ -9,14 +9,20 @@ class QuitException(KeyboardInterrupt):
     """is called to break the update loop"""
 
 
+def _sanity(func, *funcs):
+    if not inspect.isfunction(func):
+        raise TypeError('update must be a function')
+    if not all([inspect.isfunction(f) for f in funcs]):
+        raise TypeError('after_func must be a function')
+    if func.__name__ not in ['__update__', '__setup__', '__teardown__']:
+        raise ValueError('after can only be used on magic functions')
+
+
 def before(*before_func):
     """decorates the update function to run the before_func before the update function"""
 
     def dec(func):
-        if not inspect.isfunction(func):
-            raise TypeError('update must be a function')
-        if not all([inspect.isfunction(f) for f in before_func]):
-            raise TypeError('before_func must be a function')
+        _sanity(func, *before_func)
 
         def wrapper(*args, **kwargs):
             for _func in before_func:
@@ -32,10 +38,7 @@ def after(*after_func):
     """decorates the update function to run the after_func after the update function"""
 
     def dec(func):
-        if not inspect.isfunction(func):
-            raise TypeError('update must be a function')
-        if not all([inspect.isfunction(f) for f in after_func]):
-            raise TypeError('after_func must be a function')
+        _sanity(func, *after_func)
 
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
@@ -53,9 +56,9 @@ def priority(_priority):
     higher priority means it will be called first"""
 
     def dec(func):
-        if not inspect.isfunction(func):
-            raise TypeError('update must be a function')
-
+        _sanity(func)
+        if func.__name__ not in ['__update__', '__setup__', '__teardown__']:
+            raise ValueError('priority can only be used on magic functions')
         func.priority = _priority
         return func
 
@@ -66,28 +69,24 @@ def priority(_priority):
 
 def set_update_rate(new_ups):
     """sets the update rate to new_ups"""
-    global UPS
-    UPS = new_ups
+    base.UPS = new_ups
 
 
 def get_update_rate():
     """returns the update rate"""
-    return UPS
+    return base.UPS
 
 
 ### run the loop
 
 def run():
     """this is the main run loop"""
-    # first we call the setup functions of the modules
-    for module in base._get('setup'):
-        base._setup(module)
+    for module in base.get('setup'):
+        base.setup(module)
     try:
-        # then we start the update loop
         last_tick = time.time()
         while True:
-            # we now tick the update loop
-            last_tick = base._tick(last_tick)
+            last_tick = base._ick(last_tick)
     except KeyboardInterrupt:
         _exit()
     except Exception as e:
@@ -96,8 +95,8 @@ def run():
 
 
 def _exit():
-    for module in base._get('teardown'):
-        base._teardown(module)
+    for module in base.get('teardown'):
+        base.teardown(module)
     exit()
 
 

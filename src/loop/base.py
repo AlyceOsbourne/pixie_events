@@ -51,7 +51,7 @@ def _sort(modules, f_name):
     return sorted(modules, key=lambda m: _sort_key(m, f_name), reverse=True)
 
 
-def _get(f_name):
+def get(f_name):
     """gets the modules for the project, sorted by priority"""
     yield from _sort((
         module for module
@@ -62,32 +62,32 @@ def _get(f_name):
 
 ### magic function callers
 
-def _setup(module):
+def setup(module):
     """calls the setup function of the module if it exists"""
-    if hasattr(module, 'setup'):
-        if inspect.isfunction(module.setup):
-            return module.setup()
+    if hasattr(module, '__setup__'):
+        if inspect.isfunction(module.__setup__):
+            return module.__setup__()
         print(f'WARNING: {module.__name__}.setup is not a function')
 
 
 def _update(module):
     """calls the update function of the module if it exists"""
-    if hasattr(module, 'update'):
-        if inspect.isfunction(module.update):
-            return module.update()
+    if hasattr(module, '__update__'):
+        if inspect.isfunction(module.__update__):
+            return module.__update__()
         print(f'WARNING: {module.__name__}.update is not a function')
 
 
-def _teardown(module):
+def teardown(module):
     """calls the teardown function of the module if it exists"""
-    if hasattr(module, 'teardown'):
-        if inspect.isfunction(module.teardown):
-            return module.teardown()
+    if hasattr(module, '__teardown__'):
+        if inspect.isfunction(module.__teardown__):
+            return module.__teardown__()
         print(f'WARNING: {module.__name__}.teardown is not a function')
 
 
-def _tick(last_tick):
+def _ick(last_tick):
     """update tick, updates all the update function and then returns limits the update rate"""
-    for module in _get('update'):
+    for module in get('update'):
         _update(module)
     return _lim(last_tick)

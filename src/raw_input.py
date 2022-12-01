@@ -19,13 +19,13 @@ keyboard_listener = keyboard.Listener(on_press=on_press, on_release=on_release)
 mouse_listener = mouse.Listener(on_click=on_click, on_move=on_move, on_scroll=on_scroll)
 
 
-def _setup():
+def setup():
     print('Starting input listeners')
     keyboard_listener.start()
     mouse_listener.start()
 
 
-def _teardown():
+def teardown():
     print('Stopping input listeners')
     keyboard_listener.stop()
     mouse_listener.stop()
@@ -42,3 +42,7 @@ def get_input():
     }
 
 
+def clear_input():
+    pressed_keys.clear()
+    mouse_buttons.clear()
+    scroll.update({'x': 0, 'y': 0, 'dx': 0, 'dy': 0})

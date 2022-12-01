@@ -1,60 +1,24 @@
 ## Pixie Events
+(This is a work in progress)
 ___
-This system includes a core program loop, and global functions that are automatically called if the module is imported
+ A global event system emulating pythons dunder style magic
+___
 
-### The Global Functions
+### Current Features:
+- Global `__setup__`, `__update__` and `__teardown__` magic dunders
+- Flow control decorators `@before`, `@after` and `@priority`
+- Event attrs, decorators and functions to simplify intercommunication of modules
+- Event based Input system, just listen to the mouse or keyboard and get events for them
 
-`setup()`
-is called automatically on run, can be used to initialize variables and program states
+### How does it work?
+It utilizes a module scanning system to find these methods and run them they dynamically.
+This is controlled by a system loop. The loop is started by calling `.run()` from the core module, 
+and can be ended by calling `.finish()`
 
-`update()`
-is called automatically every frame
+ With the event system there are multiple ways to utilize it, you can use the `@subscribe` decorator with an event name, 
+or you can utilize the `Event` enum class, where each member is a declared event which you can subscribe to.
+The event system also include an `EventAttr` descriptor for you to use for observable attributes
+that you want to trigger an event when changed (this is still being improved)
 
-`teardown()`
-is called on program close, can be used to save data
-
-### Example:
-
-```python
-    from pixie_events import *
-
-    i = 0
-    lim = 0
-
-    # everything here is run dynamically, just run the core and it will find and run these functions
-    # across all modules (provided they are imported, I recommend a run module for this)
-
-    class Events(Event):  # create events easily
-        ping = 1
-        quit = 2
-
-
-    @Events.ping.subscribe  # subscribe to events
-    def pong():
-        print('Pong')
-
-
-    def setup():  # set up function, called on run
-        print('Setting up...')
-        Events.quit.subscribe(finish)
-
-
-    @before(lambda: print('Before'))  # decorator to add functions to be ran before the update function
-    @after(lambda: print('After'))  # decorator to add functions to be ran after the update function
-    @priority(1)  # control flow using priority
-    def update(
-    ):
-        global i
-        print('Ping')
-        Events.ping.publish()  # publish events
-        if i == lim:
-            Events.quit.publish()
-        i += 1
-
-
-    def teardown():  # tear down function, called on finish
-        print('Tearing Down...\a\b')
-
-
-    run()  # run the core
-```
+### How do I use it?
+~ to be added ~

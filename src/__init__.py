@@ -8,30 +8,30 @@ def finish():
     raise loop.QuitException
 
 
-# these functions are automatically called by the loop, no need to add them manually
-# they do not become available globally, but they are ran by a global loop
-
 @priority(float('inf'))
-def setup():
+def __setup__():
+    # set up system events
     events.subscribe('quit')(finish)
     events.register('mouse')
     events.register('keyboard')
-    raw_input._setup()
+    # trigger input handler
+    raw_input.setup()
 
 
 @priority(float('inf'))
-def update():
+def __update__():
     """this is triggered with the highest priority, this will be the main control loop for any subsystems I implement"""
     for key, value in raw_input.get_input().items():
         events.publish(key, value)
-    events._update()
+    raw_input.clear_input()
+    events.update()
 
 
 @priority(float('-inf'))
-def teardown():
+def __teardown__():
     """This is the main program teardown that is called when the program is finished"""
-    raw_input._teardown()
-    events._teardown()
+    raw_input.teardown()
+    events.teardown()
 
 
 __all__ = [

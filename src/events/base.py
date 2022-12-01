@@ -27,7 +27,7 @@ def publish(event, *args, **kwargs):
         _event_queue.append((func, args, kwargs))
 
 
-def _update():
+def update():
     # processes the events in the queue, probably a more elegant way of doing this?
     curr = _event_queue.copy()
     _event_queue.clear()
@@ -36,10 +36,10 @@ def _update():
         func(*args, **kwargs)
 
 
-def _teardown():
+def teardown():
     # clear the event queue and events
     _events.clear()
     _event_queue.clear()
 
 
-__all__ = ['subscribe', 'publish', 'register', '_teardown', '_update']
+__all__ = ['subscribe', 'publish', 'register', 'teardown', 'update']
