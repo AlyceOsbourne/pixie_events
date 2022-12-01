@@ -21,7 +21,6 @@ if __name__ == "__main__":
         register('message')
 
     def __update__():
-        # send message for formatted time
         publish('message', time.strftime('%H:%M:%S:%p'))
 
     def __teardown__():
