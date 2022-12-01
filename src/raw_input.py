@@ -3,7 +3,6 @@ from types import MappingProxyType
 from pynput import keyboard
 from pynput import mouse
 
-
 pressed_keys = {
     k: False for k in keyboard.Key
 }
@@ -42,11 +41,17 @@ def teardown():
 
 
 def get_input():
-    return {
-        'keyboard': MappingProxyType(pressed_keys),
+    _input = {
+        'keyboard': MappingProxyType(pressed_keys.copy()),
         'mouse': {
-            'buttons': MappingProxyType(mouse_buttons),
-            'position': MappingProxyType(mouse_position),
-            'scroll': MappingProxyType(scroll)
+            'buttons': MappingProxyType(mouse_buttons.copy()),
+            'position': MappingProxyType(mouse_position.copy()),
+            'scroll': MappingProxyType(scroll.copy())
         }
     }
+    scroll.update({'dx': 0, 'dy': 0})
+    return _input
+
+
+
+
