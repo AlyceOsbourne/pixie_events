@@ -1,3 +1,5 @@
+"""If you have imported this module directly, you are probably doing something funky"""
+
 import inspect
 import sys
 import time
@@ -89,13 +91,3 @@ def _tick(last_tick):
         _update(module)
     return _lim(last_tick)
 
-
-### decorators
-
-__all__ = (
-    '_setup',
-    '_update',
-    '_teardown',
-    '_tick',
-    '_get',
-)

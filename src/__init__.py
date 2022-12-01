@@ -1,6 +1,6 @@
 from .loop import *
 from .events import *
-
+from . import raw_input
 
 def finish():
     # quit the program
@@ -12,12 +12,19 @@ def finish():
 
 @priority(float('inf'))
 def setup():
-    subscribe('quit')(finish)
+    events.subscribe('quit')(finish)
+    events.register('mouse')
+    events.register('keyboard')
+    events.subscribe('mouse')(print)
+    events.subscribe('mouse')(print)
+
 
 
 @priority(float('inf'))
 def update():
     """this is triggered with the highest priority, this will be the main control loop for any subsystems I implement"""
+    for key, value in raw_input.get_input().items():
+        events.publish(key, value)
     events.update()
 
 

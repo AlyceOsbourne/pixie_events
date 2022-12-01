@@ -1,9 +1,10 @@
 from enum import Flag
 
-from .base import *
+from .base import subscribe, publish, register, update, teardown
 
 
 class EventAttr:
+    # this is an observable attribute descriptor essentially that fires an event when the attribute is set
     def __init__(self, event_name):
         self.event_name = event_name
         register(event_name)

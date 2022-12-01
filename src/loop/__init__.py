@@ -2,7 +2,7 @@ import inspect
 import time
 from functools import wraps
 
-from .base import *
+from . import base
 
 
 class QuitException(Exception):
@@ -80,18 +80,18 @@ def get_update_rate():
 def run():
     """this is the main run loop"""
     # first we call the setup functions of the modules
-    for module in _get('setup'):
-        _setup(module)
+    for module in base._get('setup'):
+        base._setup(module)
     try:
         # then we start the update loop
         last_tick = time.time()
         while True:
             # we now tick the update loop
-            last_tick = _tick(last_tick)
+            last_tick = base._tick(last_tick)
     except QuitException:
         # if we get a quit exception we trigger the teardown functions of the modules
-        for module in _get('teardown'):
-            _teardown(module)
+        for module in base._get('teardown'):
+            base._teardown(module)
         exit()
 
 
