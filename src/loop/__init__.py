@@ -5,7 +5,7 @@ from functools import wraps
 from . import base
 
 
-class QuitException(Exception):
+class QuitException(KeyboardInterrupt):
     """is called to break the update loop"""
 
 
@@ -88,11 +88,17 @@ def run():
         while True:
             # we now tick the update loop
             last_tick = base._tick(last_tick)
-    except QuitException:
-        # if we get a quit exception we trigger the teardown functions of the modules
-        for module in base._get('teardown'):
-            base._teardown(module)
-        exit()
+    except KeyboardInterrupt:
+        _exit()
+    except Exception as e:
+        print(e)
+        _exit()
+
+
+def _exit():
+    for module in base._get('teardown'):
+        base._teardown(module)
+    exit()
 
 
 __all__ = [

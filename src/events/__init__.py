@@ -1,6 +1,6 @@
 from enum import Flag
 
-from .base import subscribe, publish, register, update, teardown
+from .base import subscribe, publish, register, _update, _teardown
 
 
 class EventAttr:

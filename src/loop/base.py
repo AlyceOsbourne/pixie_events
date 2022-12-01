@@ -5,7 +5,6 @@ import sys
 import time
 from functools import cache
 
-
 UPS = 60  # updates per second
 
 
@@ -45,10 +44,12 @@ def _sort_key(module, f_name):
         return 0
     return getattr(getattr(module, f_name), 'priority')
 
+
 @cache
 def _sort(modules, f_name):
     """sorts the modules by the priority of the update function"""
     return sorted(modules, key=lambda m: _sort_key(m, f_name), reverse=True)
+
 
 def _get(f_name):
     """gets the modules for the project, sorted by priority"""
@@ -90,4 +91,3 @@ def _tick(last_tick):
     for module in _get('update'):
         _update(module)
     return _lim(last_tick)
-
