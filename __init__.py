@@ -1,10 +1,9 @@
 from src import *
 
 if __name__ == "__main__":
-    # give example of the global system in action
 
     e, i, m = None, 0, 100
-    set_update_rate(1)
+
 
     class TestAttribute:
         event_attr = EventAttr('test')
@@ -21,6 +20,9 @@ if __name__ == "__main__":
         e.event_attr = (i := i + 1)
         if i >= m:
             finish()
+
+    def teardown():
+        print('teardown')
 
     run()
 

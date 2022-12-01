@@ -28,17 +28,17 @@ def teardown():
 
 
 __all__ = [
-    'loop',
-    'run',
-    'subscribe',
-    'publish',
-    'finish',
-    'before',
     'after',
-    'priority',
-    'register',
+    'before',
     'Event',
     'EventAttr',
-    'set_update_rate',
+    'finish',
     'get_update_rate',
+    'loop',
+    'priority',
+    'publish',
+    'register',
+    'run',
+    'set_update_rate',
+    'subscribe',
 ]
