@@ -1,11 +1,16 @@
+
 """If you have imported this module directly, you are probably doing something funky"""
 
 import inspect
 import sys
 import time
-from functools import cache
+from functools import cache, wraps
 
 UPS = 60  # updates per second
+
+
+class QuitException(KeyboardInterrupt):
+    """is called to break the update loop"""
 
 
 def _lim(last_time):
@@ -29,14 +34,16 @@ def _predicate(module):
         module is sys.modules[__name__],
         not hasattr(module, '__file__'),
         not getattr(module, '__file__', '').startswith(sys.path[0]),
-        not any([inspect.isfunction(getattr(module, attr, None)) for attr in ('__setup__', '__update__', '__teardown__')]),
+        not any(
+            [inspect.isfunction(getattr(module, attr, None)) for attr in ('__setup__', '__update__', '__teardown__')]),
     ))
 
 
 @cache
 def _sort_key(module, f_name):
     """Checks the module for the function name and returns the priority if it exists on the function object,
-    otherwise returns almost minus infinity, this is so you can have a range of values, and make it so that any defined priority takes precedence"""
+    otherwise returns almost minus infinity, this is so you can have a range of values, and make it so that any
+    defined priority takes precedence """
     if (
             not hasattr(module, f_name)
             or not hasattr(getattr(module, f_name), 'priority')
@@ -91,3 +98,105 @@ def tick(last_tick):
     for module in get('__update__'):
         update(module)
     return _lim(last_tick)
+
+
+def _sanity(func, *funcs):
+    if not inspect.isfunction(func):
+        raise TypeError('update must be a function')
+    if not all([inspect.isfunction(f) for f in funcs]):
+        raise TypeError('after_func must be a function')
+    if func.__name__ not in ['__update__', '__setup__', '__teardown__']:
+        raise ValueError('after can only be used on magic functions')
+
+
+def before(*before_func):
+    """decorates the update function to run the before_func before the update function"""
+
+    def dec(func):
+        _sanity(func, *before_func)
+
+        def wrapper(*args, **kwargs):
+            for _func in before_func:
+                _func()
+            return func(*args, **kwargs)
+
+        return wraps(func)(wrapper)
+
+    return dec
+
+
+def after(*after_func):
+    """decorates the update function to run the after_func after the update function"""
+
+    def dec(func):
+        _sanity(func, *after_func)
+
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            for _func in after_func:
+                _func()
+            return result
+
+        return wraps(func)(wrapper)
+
+    return dec
+
+
+def priority(_priority):
+    """sets the priority of the update function
+    higher priority means it will be called first"""
+
+    def dec(func):
+        _sanity(func)
+        if func.__name__ not in ['__update__', '__setup__', '__teardown__']:
+            raise ValueError('priority can only be used on magic functions')
+        func.priority = _priority
+        return func
+
+    return dec
+
+
+### utility functions
+
+def set_update_rate(new_ups):
+    """sets the update rate to new_ups"""
+    global UPS
+    UPS = new_ups
+
+
+def get_update_rate():
+    """returns the update rate"""
+    return UPS
+
+
+### run the loop
+
+def run():
+    """this is the main run loop"""
+    for module in get('setup'):
+        setup(module)
+    try:
+        last_tick = time.time()
+        while True:
+            last_tick = tick(last_tick)
+    except KeyboardInterrupt:
+        _exit()
+    except Exception as e:
+        print(e)
+        _exit()
+
+
+def _exit():
+    for module in get('teardown'):
+        teardown(module)
+    exit()
+
+
+__all__ = [
+    'after',
+    'before',
+    'priority',
+    'set_update_rate',
+    'get_update_rate',
+    'run',
+]

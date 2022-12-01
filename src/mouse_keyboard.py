@@ -3,6 +3,7 @@ from types import MappingProxyType
 from pynput import keyboard
 from pynput import mouse
 
+
 pressed_keys = {
     k: False for k in keyboard.Key
 }

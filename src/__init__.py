@@ -1,6 +1,7 @@
 from .loop import *
 from .events import *
-from . import raw_input
+from .updatable import *
+from . import mouse_keyboard
 
 events.subscribe('quit')
 
@@ -15,14 +16,15 @@ def __setup__():
     events.register('mouse')
     events.register('keyboard')
 
-    raw_input.setup()
+    mouse_keyboard.setup()
 
 
 @priority(float('inf'))
 def __update__():
     """this is triggered with the highest priority, this will be the main control loop for any subsystems I implement"""
     events.update()
-    update_inputs(raw_input.get_input())
+    update_inputs(mouse_keyboard.get_input())
+    updatable.update()
 
 
 def update_inputs(_input):
@@ -33,7 +35,7 @@ def update_inputs(_input):
 @priority(float('-inf'))
 def __teardown__():
     """This is the main program teardown that is called when the program is finished"""
-    raw_input.teardown()
+    mouse_keyboard.teardown()
     events.teardown()
 
 
